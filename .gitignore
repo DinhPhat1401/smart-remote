@@ -1,0 +1,59 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build outputs
+dist/
+build/
+out/
+.next/
+
+# Capacitor
+app/android/
+app/ios/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+supabase/.env
+
+# Supabase
+supabase/.branches/
+supabase/.temp/
+
+# Arduino / PlatformIO
+firmware/.pio/
+firmware/SmartRemote/build/
+
+# IDE
+.vscode/
+.idea/
+*.iml
+*.suo
+*.user
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# TypeScript
+*.tsbuildinfo
+
+# Testing
+coverage/
+
+# Misc
+*.bak
+*.orig

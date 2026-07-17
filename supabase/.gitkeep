@@ -1,0 +1,3 @@
+-- SmartRemote Database Schema
+-- Run via: supabase db push
+-- Placeholder - see migrations/001_initial_schema.sql
