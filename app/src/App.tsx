@@ -1,122 +1,140 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { useState, useEffect } from 'react'
+import { BrowserRouter, Routes, Route, useLocation, Navigate } from 'react-router-dom'
+import { supabase } from './lib/supabase'
+import { connection } from './lib/connection'
 
-function App() {
-  const [count, setCount] = useState(0)
+import Home     from './pages/Home'
+import Remote   from './pages/Remote'
+import Editor   from './pages/Editor'
+import Learn    from './pages/Learn'
+import Library  from './pages/Library'
+import Settings from './pages/Settings'
+import Login    from './pages/Login'
+
+import './index.css'
+
+// ─── Nav Icons ────────────────────────────────────────────────
+const NavItems = [
+  { to: '/',        icon: '🏠', label: 'Home' },
+  { to: '/library', icon: '📚', label: 'Library' },
+  { to: '/learn',   icon: '📡', label: 'Học lệnh' },
+  { to: '/settings',icon: '⚙️', label: 'Cài đặt' },
+]
+
+function BottomNav() {
+  const location = useLocation()
+  const hide = ['/login', '/remote/', '/editor/'].some(p => location.pathname.startsWith(p))
+  if (hide) return null
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
+    <nav className="bottom-nav">
+      {NavItems.map(item => (
+        <a
+          key={item.to}
+          href={item.to}
+          className={`nav-item ${location.pathname === item.to ? 'active' : ''}`}
+          onClick={e => { e.preventDefault(); window.history.pushState({}, '', item.to); window.dispatchEvent(new PopStateEvent('popstate')) }}
         >
-          Count is {count}
-        </button>
-      </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
+          <span style={{ fontSize: '1.3rem' }}>{item.icon}</span>
+          <span>{item.label}</span>
+        </a>
+      ))}
+    </nav>
   )
 }
 
-export default App
+function AuthGuard({ children }: { children: React.ReactNode }) {
+  const [user, setUser]     = useState<any>(undefined) // undefined = loading
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => setUser(data.user))
+    supabase.auth.onAuthStateChange((_evt, session) => setUser(session?.user || null))
+
+    // Restore device from localStorage
+    const deviceId  = localStorage.getItem('smartremote_device_id')
+    const deviceKey = localStorage.getItem('smartremote_device_key')
+    if (deviceId && deviceKey) {
+      connection.setDevice(deviceId, deviceKey)
+      connection.useCloud() // Auto-switch to cloud mode
+    }
+
+  }, [])
+
+  if (user === undefined) {
+    // Loading
+    return (
+      <div style={{
+        height: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        flexDirection: 'column',
+        gap: 16,
+      }}>
+        <div style={{ fontSize: '3rem' }}>🎮</div>
+        <div className="loading-spinner" />
+      </div>
+    )
+  }
+
+  if (!user) return <Navigate to="/login" replace />
+  return <>{children}</>
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <div className="app-layout">
+        {/* Connection status bar */}
+        <ConnectionBar />
+
+        <main className="page-content">
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/" element={<AuthGuard><Home /></AuthGuard>} />
+            <Route path="/remote/:id" element={<AuthGuard><Remote /></AuthGuard>} />
+            <Route path="/editor/:id" element={<AuthGuard><Editor /></AuthGuard>} />
+            <Route path="/learn" element={<AuthGuard><Learn /></AuthGuard>} />
+            <Route path="/library" element={<AuthGuard><Library /></AuthGuard>} />
+            <Route path="/settings" element={<AuthGuard><Settings /></AuthGuard>} />
+          </Routes>
+        </main>
+
+        <BottomNav />
+      </div>
+    </BrowserRouter>
+  )
+}
+
+function ConnectionBar() {
+  const [mode, setMode] = useState(connection.getState().mode)
+
+  useEffect(() => {
+    return connection.onStateChange(s => setMode(s.mode))
+  }, [])
+
+  const config: Record<string, { label: string; color: string }> = {
+    ble:    { label: '🔵 BLE',    color: '#1d4ed8' },
+    wifi:   { label: '🟢 WiFi',   color: '#15803d' },
+    cloud:  { label: '🟣 Cloud',  color: '#4f46e5' },
+    offline:{ label: '⚫ Offline', color: '#374151' },
+  }
+
+  const cfg = config[mode] || config.offline
+  return (
+    <div style={{
+      height: 28,
+      background: cfg.color + '33',
+      borderBottom: `1px solid ${cfg.color}55`,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      fontSize: '0.72rem',
+      fontWeight: 600,
+      color: cfg.color,
+      letterSpacing: '0.04em',
+    }}>
+      {cfg.label}
+    </div>
+  )
+}

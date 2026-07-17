@@ -4,8 +4,10 @@
  * Priority: BLE → WiFi WebSocket → Cloud (Supabase Realtime)
  */
 
-import { ble, DeviceStatus } from './ble'
-import { supabase, IRCommand } from './supabase'
+import { ble } from './ble'
+import type { DeviceStatus } from './ble'
+import { supabase } from './supabase'
+import type { IRCommand } from './supabase'
 import { getCommand, buildBLEPacket } from './ir-store'
 
 export type ConnectionMode = 'ble' | 'wifi' | 'cloud' | 'offline'

@@ -5,8 +5,9 @@
  * Mục đích: BLE offline operation – gửi RAW data mà không cần network
  */
 
-import { openDB, IDBPDatabase } from 'idb'
-import { IRCommand } from './supabase'
+import { openDB } from 'idb'
+import type { IDBPDatabase } from 'idb'
+import type { IRCommand } from './supabase'
 
 const DB_NAME    = 'smartremote'
 const DB_VERSION = 1

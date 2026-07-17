@@ -5,7 +5,8 @@
  */
 
 import { Capacitor } from '@capacitor/core'
-import { BleClient, BleDevice, dataViewToText, textToDataView } from '@capacitor-community/bluetooth-le'
+import { BleClient, dataViewToText, textToDataView } from '@capacitor-community/bluetooth-le'
+import type { BleDevice } from '@capacitor-community/bluetooth-le'
 
 // ─── UUIDs phải khớp với firmware config.h ──────────────────────
 export const SERVICE_UUID  = '12345678-0001-0000-0000-000000000001'
