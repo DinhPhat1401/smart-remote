@@ -10,8 +10,14 @@ out/
 .next/
 
 # Capacitor
-app/android/
-app/ios/
+app/android/.gradle/
+app/android/build/
+app/android/app/build/
+app/android/local.properties
+app/android/captmp/
+app/ios/App/App/build/
+app/ios/App/Pods/
+
 
 # Environment variables
 .env
